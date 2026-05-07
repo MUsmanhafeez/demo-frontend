@@ -1,0 +1,10 @@
+NODE_ENV=development
+PORT=4000
+
+# MongoDB connection string (MongoDB Atlas recommended)
+# Example:
+# MONGODB_URI=mongodb+srv://USER:PASSWORD@cluster0.xxxxx.mongodb.net/demo?retryWrites=true&w=majority
+MONGODB_URI=mongodb+srv://usmanhafeez1478:I37tOHmrdEw8CWMb@demo.p8oxoxz.mongodb.net/
+
+# Comma-separated list or single origin
+CORS_ORIGIN=http://localhost:3000
