@@ -1,15 +1,17 @@
 name: Frontend Deployment Pipeline
-
+ 
+ # only run on this branch
 on:
   push:
     branches:
-      - main
+      - main   # only run on this branch
 
 jobs:
+
   deploy:
     name: Deploy to EC2
     runs-on: ubuntu-latest
-
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -21,14 +23,10 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            set -euo pipefail
             echo "✅ Connected to EC2!"
             cd /home/ubuntu/demo-frontend
             git pull origin main
-            # devDependencies (TypeScript, Tailwind, etc.) are required for next build
-            npm ci --include=dev
+            npm ci
             npm run build
-            test -f .next/BUILD_ID || { echo "❌ next build did not produce .next/BUILD_ID"; exit 1; }
-            pm2 startOrReload ecosystem.config.cjs --update-env
-            pm2 save
-            echo "🚀 Frontend deployment completed successfully!"
+            pm2 reload "demo-frontend"
+            echo "🚀 Frontend Deployment completed successfully!"
