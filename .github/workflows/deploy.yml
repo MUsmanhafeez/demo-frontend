@@ -12,9 +12,39 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Deploy to EC2 via SSH
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      # Build on GitHub (more RAM) — EC2 t2.micro often OOMs on npm ci + build
+      - name: Install and build
+        run: |
+          npm ci
+          npm run build
+
+      - name: Package for deploy
+        run: |
+          tar -czf deploy.tar.gz \
+            .next \
+            public \
+            package.json \
+            package-lock.json \
+            next.config.ts
+
+      - name: Upload to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: deploy.tar.gz
+          target: /home/ubuntu/demo-frontend
+
+      - name: Install production deps and restart
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -24,7 +54,9 @@ jobs:
             set -e
             cd /home/ubuntu/demo-frontend
             git pull origin main
-            npm ci --include=dev
-            npm run build
+            tar -xzf deploy.tar.gz
+            rm -f deploy.tar.gz
+            npm ci --omit=dev --no-audit --no-fund
+            test -f .next/BUILD_ID
             pm2 reload demo-frontend
             echo "Frontend deployment completed"
