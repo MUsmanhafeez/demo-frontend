@@ -1,3 +1,5 @@
+import { revalidatePath } from "next/cache";
+
 export default function Home() {
   return (
     <div className="min-h-dvh bg-zinc-50 text-zinc-900 dark:bg-black dark:text-zinc-50">
@@ -42,7 +44,6 @@ async function api(path: string, init?: RequestInit) {
 async function Items() {
   const data = await api("/api/items");
   const items: Item[] = data.items ?? [];
-console.log(items,'these are items');
 
   return (
     <div className="space-y-4">
@@ -90,6 +91,7 @@ async function createItem(formData: FormData) {
   const title = String(formData.get("title") ?? "").trim();
   if (!title) return;
   await api("/api/items", { method: "POST", body: JSON.stringify({ title }) });
+  revalidatePath("/");
 }
 
 async function deleteItem(formData: FormData) {
@@ -97,4 +99,5 @@ async function deleteItem(formData: FormData) {
   const id = String(formData.get("id") ?? "").trim();
   if (!id) return;
   await api(`/api/items/${id}`, { method: "DELETE" });
+  revalidatePath("/");
 }
