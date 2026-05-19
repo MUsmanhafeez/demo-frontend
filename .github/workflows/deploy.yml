@@ -1,17 +1,15 @@
 name: Frontend Deployment Pipeline
- 
- # only run on this branch
+
 on:
   push:
     branches:
-      - main   # only run on this branch
+      - main
 
 jobs:
-
   deploy:
     name: Deploy to EC2
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -23,10 +21,10 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            echo "✅ Connected to EC2!"
+            set -e
             cd /home/ubuntu/demo-frontend
             git pull origin main
-            npm ci
+            npm ci --include=dev
             npm run build
-            pm2 reload "demo-frontend"
-            echo "🚀 Frontend Deployment completed successfully!"
+            pm2 reload demo-frontend
+            echo "Frontend deployment completed"
