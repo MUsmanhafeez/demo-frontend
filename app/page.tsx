@@ -44,6 +44,7 @@ async function Items() {
   const items: Item[] = data.items ?? [];
 console.log(items,'these are items');
 console.log(data,'these are data');
+console.log(data.items,'these are items');
   return (
     <div className="space-y-4">
       <form action={createItem} className="flex gap-2">
