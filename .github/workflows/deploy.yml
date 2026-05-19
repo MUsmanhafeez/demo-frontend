@@ -27,5 +27,6 @@ jobs:
             cd /home/ubuntu/demo-frontend
             git pull origin main
             npm install
+            npm run build
             pm2 reload "demo-frontend"
             echo "🚀 Frontend Deployment completed successfully!"
